@@ -5,9 +5,10 @@ function Y = emdB(IMF)
 	%
 	% See Also: gcm_search, emdH.
 	%
-  % [1] Smith, Jordan R., Mahdi H. Al-Badrawi, and Nicholas J. Kirsch. 
-  %   "An Optimized De-Noising Scheme Based on the Null Hypothesis of Intrinsic Mode Functions." 
-  %   IEEE Signal Processing Letters 26.8 (2019): 1232-1236.
+    % [1] Smith, Jordan R., Mahdi H. Al-Badrawi, and Nicholas J. Kirsch. 
+    %   "An Optimized De-Noising Scheme Based on the Null Hypothesis of 
+    %   Intrinsic Mode Functions." IEEE Signal Processing 
+    %   Letters 26.8 (2019): 1232-1236.
 
 	[r, c] = size(IMF);
 	if(r > c)
