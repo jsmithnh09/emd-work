@@ -13,11 +13,12 @@ for iSig = 1:nargin
     end
 end
 h = figure;
-for iSig = 1:nargin
-    subplot(nsigs, 1, iSig);
+for iSig = 1:nsigs
     X = varargin{iSig};
     t = 1:length(X);
-    plot(t, varargin{iSig}); grid('on');
+    subplot(nsigs, 1, iSig);
+    plot(t, varargin{iSig}, 'g'); grid('on');
+    set(gca, 'Color', 'k');
     xlim([1 t(end)]);
 end
 if (nargout == 1)

@@ -19,7 +19,7 @@ function y = emdK(IMF)
 %**************************************************************************
 persistent pKurt;
 if (isempty(pKurt))
-    Baxis = 0.1:0.01:4;
+    Baxis = 0.1:0.0001:4;
     Kcoeff = ggdkurt(Baxis);
     pKurt = struct('B', Baxis, 'K', Kcoeff);
 end
@@ -32,7 +32,13 @@ end
 %**************************************************************************
 % Perform the actual IMF filtering.
 %**************************************************************************
+
+% if a single vector, apply EMD to extract IMF's.
+if (isvector(IMF))
+    IMF = emd_rilling(IMF);
+end
 [m, ~] = size(IMF);
+
 valid = [false; true(m-1, 1)];
 for imfInd = 2:m
     % determine 4th moment estimate.
