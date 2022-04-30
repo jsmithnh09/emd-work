@@ -99,18 +99,11 @@ for snr_idx = 1:length(env.params.snr)
         filter_name = env.filters(filt_idx).label;
         mcIdx = 1;
         [mcSNR, mcMSE, sigma, ci] = deal([]);
-        while(1)
-            switch ntype
-                case {'pink', 'violet', 'red', 'blue'}
-                    noise = ACN(xin, snr(snr_idx), ntype);
-                case 'white'
-                    noise = mAWGN(xin, snr(snr_idx));
-                otherwise
-                    error('Unknown noise type "%s".', env.params.noisetype);
-            end % switch
 
-            % apply noise.
-            xn = xin(:) + noise(:);
+        while(1)
+
+            % generate/apply noise with SNRdB and noise-type.
+            xn = acn(xin, snr(snr_idx), ntype);
 
             % extract the IMF and perform de-noising.
             ximf = emd_rilling(xn);
