@@ -1,50 +1,60 @@
-function output = acn(signal, SNR, type)
+function y = acn(x, SNRdB, type)
 % Additive Colored Noise with user specified dB contamination.
 %
-% OUTPUT = ACN(SIGNAL, SNR, TYPE)
+% Y = ACN(SIGNAL, SNR, TYPE)
 %   SIGNAL (double) is the input signal to contaminate.
-%   SNR (double) is a scalar of decibel contamination.
-%   TYPE (char) is the type of noise to apply.
+%   SNR (double) is a scalar of power dB contamination.
+%   TYPE (char) is the type of noise to apply. Valid inputs include:
+%       'WHITE'     -- standard normally distributed white noise.
+%       'RED'       -- brownian noise, (random motion of particles.)
+%       'BLUE'      -- blue noise found in Cherenkov Radiation
+%       'VIOLET'    -- or purple, same as acoustic thermal noise in water.
+%       'PINK'      -- reference noise in audio engineering.
 %
 % Contact: Jordan R. Smith
 
 if (~ischar(type))
   error('common:acn:InvalidInput', ...
     'Input TYPE must be type CHAR.');
-elseif (~isscalar(SNR) || ~isdouble(SNR))
+elseif (~isscalar(SNRdB) || ~isnumeric(SNRdB))
   error('common:acn:InvalidInput', ...
-    'Input SNR must be a scalar power decibel.');
+    'Input SNRdB must be a scalar power decibel.');
 end
+SNRlin = 10^(SNRdB/10); % SNR measured as Ps/Pn, or Ps/var(n) if zero-mean.
 
 % re-orient input signal.
-input = signal(:).';
-if (size(signal, 2) ~= 1)
+x = x(:);
+if (~isvector(x))
     error('common:acn:InvalidInput', ...
         'Input SIGNAL must be a unidimensional signal.');
 end
-npts = numel(input);
+npts = numel(x);
 
-% determine signal and noise power.
-signal_power = var(input - mean(input));
-noise_power  = signal_power / (10^(SNR/10));
-
+% generate the noise.
 switch type
+    case 'white'
+        n = randn(npts,1);
     case 'pink'
-        noisegen = pinknoise(npts);
-    case 'violet'
-        noisegen = violetnoise(npts);
+        n = pinknoise(npts);
+    case {'violet', 'purple'}
+        n = violetnoise(npts);
     case 'red'
-        noisegen = rednoise(npts);
+        n = rednoise(npts);
     case 'blue'
-        noisegen = bluenoise(npts);
+        n = bluenoise(npts);
     otherwise
         error('common:acn:InvalidInput', ...
             'Unrecognized noise type "%s".', type);
 end % switch
+% unity variance, zero-mean.
+n = n(:);
+n = (n - mean(n))/std(n, 1);
 
-% delegate the appropriate noise level.
-noisegen = noisegen - mean(noisegen);   % mu = 0.
-output = noisegen / std(noisegen)*sqrt(noise_power);
+% delegate the appropriate noise level. Ps/Pn drops (1/N) term.
+Ps = sum(x.^2);
+Pn = sum(n.^2);
+alpha = sqrt(Ps / (SNRlin * Pn));
+y = x + alpha * n;
 return;
 end % acn
 
@@ -91,10 +101,6 @@ y = real(ifft(X));
 
 % ensure that the length of y is N.
 y = y(1, 1:N);
-
-% ensure unity standard deviation and zero mean value.
-y = y - mean(y);
-y = y/std(y, 1);
 
 end % rednoise
 
@@ -145,10 +151,6 @@ y = real(ifft(X));
 % ensure that the length of y is N
 y = y(1, 1:N);
 
-% ensure unity standard deviation and zero mean value
-y = y - mean(y);
-y = y/std(y, 1);
-
 end % bluenoise
 
 %-----------------------------------------------------
@@ -198,9 +200,6 @@ y = real(ifft(X));
 % ensure that the length of y is N
 y = y(1, 1:N);
 
-% ensure unity standard deviation and zero mean value
-y = y - mean(y);
-y = y/std(y, 1);
 
 end % violetnoise
 %------------------------------------------------
@@ -249,9 +248,5 @@ y = real(ifft(X));
 
 % ensure that the length of y is N
 y = y(1, 1:N);
-
-% ensure unity standard deviation and zero mean value
-y = y - mean(y);
-y = y/std(y, 1);
 
 end % pinknoise
