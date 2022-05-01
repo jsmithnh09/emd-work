@@ -4,7 +4,8 @@ function [lower, upper] = gcmci(P, N, Z)
 %   [LOWER, UPPER] = GGDCI(P, N, Z)
 %       P (scalar) is the estimate
 %       N (scalar) are the number of samples
-%       Z (scalar) is the z-score (default: 2.576)
+%       Z (scalar) is the z-score (default: 2.576.) Other choice is 1.96
+%       for Confidence Interval of 95%.
 %
 % See Also: GCM_SEARCH
 
