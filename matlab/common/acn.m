@@ -20,7 +20,7 @@ elseif (~isscalar(SNRdB) || ~isnumeric(SNRdB))
   error('common:acn:InvalidInput', ...
     'Input SNRdB must be a scalar power decibel.');
 end
-SNRlin = 10^(SNRdB/10); % SNR measured as Ps/Pn, or Ps/var(n) if zero-mean.
+SNRlin = db2pow(SNRdB);
 
 % re-orient input signal.
 x = x(:);
