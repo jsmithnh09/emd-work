@@ -1,3 +1,5 @@
+module Config
+
 ### possible interpolation modes for EMD.
 @enum InterpMode Linear Pchip Cubic Spline
 
@@ -24,3 +26,5 @@ struct EMDConfig{T<:AbstractFloat}
         new{T}(Int(2_000), typemax(Int), Int(4), 0, 0, t, Array{T}([0.05, 0.5, 0.05]), x, N, Cubic)
     end
 end
+
+end # module

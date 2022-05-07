@@ -1,4 +1,4 @@
-using .config
+module Util
 
 """
     y = fliplr(x)
@@ -9,18 +9,19 @@ fliplr(x::AbstractVector) = x[end:-1:1]
 
 
 """
-    (tmin, tmax, zmin, zmax) = boundscheck(indmin::Array, indmax::Array, t::Array, z::Array, nbsym::Int)
+    (tmin, tmax, zmin, zmax) = boundarycheck(indmin::Array, indmax::Array, t::Array, z::Array, nbsym::Int)
 
 Boundary check to define extrema beyond the input signal limits to prevent boundary issues.
 Without mirror symmetry, we get ramping at either ends of the IMF signal.
 """
-function boundscheck(
+function boundarycheck(
     indmin::AbstractVector{T}, 
     indmax::AbstractVector{T}, 
     t::AbstractVector, 
     x::AbstractVector, 
     z::AbstractVector, 
-    nbsym::Int) where {T<:Int}
+    nbsym::Int
+    ) where {T<:Int}
     length(indmin) + length(indmax) ≥ 3 || error("EMD: boundscheck: not enough extrema.")
     lx = length(x)
     if (indmax[1] > indmin[1])
@@ -101,8 +102,7 @@ function boundscheck(
     zmin = vcat(zlmin, z[indmin], zrmin)
     zmax = vcat(zlmax, t[indmax], zrmax)
 
-    tmin, tmax, zmin, zmax
-            
+    tmin, tmax, zmin, zmax         
 end
 
 """
@@ -114,12 +114,6 @@ the decomposition.
 function stopemd(imf::AbstractVector)
     (indmin, indmax) = extr(imf)
     Bool(length(indmin) + length(indmax) < 3)
-end
-
-function stopsift(opts::EMDConfig, imf::AbstractVector)
-    (mean, npeaks, ndips, amp) = meanamplitude(opts, imf)
-    Sx = abs.(mean) ./ amp
-    S = mean(Sx)
 end
 
 """
@@ -150,12 +144,12 @@ domain `t`. min/max comparison attempts to match MATLAB behavior.
 """
 function extrminmax(x::AbstractVector)
     dx = diff(x)
-    m = length(x)
+    m = length(dx)
     d1 = dx[1:m-1]
     d2 = dx[2:m]
     bad = (dx .== 0)
-    indmin = findall(d1.*d2<0 & d1<0) .+ 1
-    indmax = findall(d1.*d2<0 & d1>0) .+ 1
+    indmin = findall((d1.*d2 .< 0) .& (d1 .< 0)) .+ 1
+    indmax = findall((d1.*d2 .< 0) .& (d1 .> 0)) .+ 1
     if any(bad)
         imax, imin = Int[], Int[]
         dd = diff(vcat(false, bad, false))
@@ -213,15 +207,15 @@ Extract indices of zero-crossing extrema.
 """
 function extrzeros(x::AbstractVector)
     x1 = x[1:end-1]
-    x2 = [x2:end]
-    indzer = findall(x1.*x2 < 0)
+    x2 = x[2:end]
+    indzer = findall(x1.*x2 .< 0)
     iz = (x .== 0)
     if any(iz)
         zer = findall(x == 0)
         if any(diff(iz) == 1)
             dz = diff(vcat(false, iz, false))
-            headz = findall(dz == 1)
-            tailz = findall(dz == -1) .- 1
+            headz = findall(dz .== 1)
+            tailz = findall(dz .== -1) .- 1
             zhalf = zhalf == 0.5 ? Int(1) : round(Int, (headz + tailz) / 2)
         else
             indz = iz
@@ -230,3 +224,5 @@ function extrzeros(x::AbstractVector)
     end
     indzer
 end
+
+end # module

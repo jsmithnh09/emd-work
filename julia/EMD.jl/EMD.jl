@@ -7,8 +7,8 @@ import DSP, Distributions, Interpolations
 using Statistics: mean
 
 ## include environment setup.
-include("util.jl")
 include("config.jl")
+include("util.jl")
 
 EMD
 
