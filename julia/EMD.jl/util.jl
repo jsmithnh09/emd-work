@@ -153,8 +153,8 @@ function extrminmax(x::AbstractVector)
     if any(bad)
         imax, imin = Int[], Int[]
         dd = diff(vcat(false, bad, false))
-        head = findall(dd == 1)
-        tail = findall(dd == -1)
+        head = findall(dd .== 1)
+        tail = findall(dd .== -1)
         if (head[1] == 1)
             if length(head) > 1
                 head = head[2:end]
