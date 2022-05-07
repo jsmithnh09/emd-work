@@ -211,12 +211,15 @@ function extrzeros(x::AbstractVector)
     indzer = findall(x1.*x2 .< 0)
     iz = (x .== 0)
     if any(iz)
-        zer = findall(x == 0)
-        if any(diff(iz) == 1)
+        zer = findall(x .== 0)
+        if any(diff(iz) .== 1)
             dz = diff(vcat(false, iz, false))
             headz = findall(dz .== 1)
             tailz = findall(dz .== -1) .- 1
-            zhalf = zhalf == 0.5 ? Int(1) : round(Int, (headz + tailz) / 2)
+            indz = (headz .+ tailz) ./ 2
+            for i = 1:length(indz)
+                indz[i] = indz[i] == 0.5 ? Int(1) : round(Int, indz[i])
+            end
         else
             indz = iz
         end
