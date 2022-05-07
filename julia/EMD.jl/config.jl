@@ -74,3 +74,66 @@ function orthoindex(opts::EMDConfig, imf::AbstractVector)
     end
     0.5*s
 end
+
+"""
+    (indmin, indmax) = extrminmax(x, t)
+`extr` extracts the indices of extrema in value vector `x` over
+domain `t`. min/max comparison attempts to match MATLAB behavior.
+"""
+function extrminmax(x::AbstractVector{T})
+    dx = diff(x)
+    m = length(x)
+    d1 = dx[1:m-1]
+    d2 = dx[2:m]
+    bad = (dx .== 0)
+    indmin = findall(d1.*d2<0 & d1<0) + 1
+    indmax = findall(d1.*d2<0 & d1>0) + 1
+    if any(bad)
+        imax, imin = Int[], Int[]
+        dd = diff(vcat(false, bad, false))
+        head = findall(dd == 1)
+        tail = findall(dd == -1)
+        if (head[1] == 1)
+            if length(head) > 1
+                head = head[2:end]
+                tail = tail[2:end]
+            else
+                head, tail = empty(head), empty(tail)
+            end
+        end
+        if length(head) > 0
+            if tail[end] == m
+                if length(head) > 1
+                    head = head[1:end-1]
+                    tail = tail[1:end-1]
+                else
+                    head, tail = empty(head), empty(tail)
+                end
+            end
+        end
+        lh = length(head)
+        if lh > 0
+            for k = 1:lh
+                # attempting to match rounding in MATLAB. 0.5 corner-case.
+                half = (head[k] + tail[k]) / 2
+                half = half == 0.5 ? Int(1) : round(Int, half)
+                if d[head[k]-1] > 0
+                    if d[tail[k]] < 0
+                        append!(imax, half)
+                    end
+                else
+                    if d[tail[k]] > 0
+                        append!(imin, half)
+                    end
+                end
+            end
+        end
+        if length(imax) > 0
+            sort!(append!(indmax, imax))
+        end
+        if length(imin) > 0
+            sort!(append!(indmin, imin))
+        end
+    end
+    indmin, indmax
+end
