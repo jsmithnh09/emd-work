@@ -9,7 +9,8 @@ fliplr(x::AbstractVector) = x[end:-1:1]
 
 
 """
-    (tmin, tmax, zmin, zmax) = boundscheck(opts::EMDConfig, indmin::Array, indmax::Array, nbsym::Int)
+    (tmin, tmax, zmin, zmax) = boundscheck(indmin::Array, indmax::Array, t::Array, z::Array, nbsym::Int)
+
 Boundary check to define extrema beyond the input signal limits to prevent boundary issues.
 Without mirror symmetry, we get ramping at either ends of the IMF signal.
 """
@@ -106,6 +107,7 @@ end
 
 """
    stop = stopemd(opts::EMDConfig, imf::AbstractVector)
+
 Returns a flag indicating if at least 3 extrema are present to continue 
 the decomposition.
 """
@@ -122,6 +124,7 @@ end
 
 """
    oind = orthoindex(imf::AbstractVector)
+
 `orthoindex` computes the index of orthogonality based on the input
 signal `x` and the prospective mode function `imf`.
 """
@@ -141,6 +144,7 @@ end
 
 """
     (indmin, indmax) = extrminmax(x)
+    
 `extr` extracts the indices of extrema in value vector `x` over
 domain `t`. min/max comparison attempts to match MATLAB behavior.
 """
