@@ -1,12 +1,13 @@
 module Util
 
+import Dierckx: Spline1D
+
 """
     y = fliplr(x)
 
 alias to flip the input vector `x`.
 """
 fliplr(x::AbstractVector) = x[end:-1:1]
-
 
 """
     (tmin, tmax, zmin, zmax) = boundarycheck(indmin::Array, indmax::Array, t::Array, z::Array, nbsym::Int)
@@ -199,6 +200,32 @@ function extrminmax(x::AbstractVector)
     end
     indmin, indmax
 end
+
+"""
+    (mean, numextr, numzer, amp) = meanamplitude(x::AbstractVector, order::Int=3)
+
+Computes the mean of the envelopes, the mode amplitude estimate, and the number
+of extrema, including zeros. String should indicate "cubic", "linear", etc.
+"""
+
+function meanamplitude(x::AbstractVector, order::Int=3)
+    (indmin, indmax) = extrminmax(x)
+    indzer = extrzeros(x)
+    numextr = length(indmin) + length(indmax)
+    numzer = length(indzer)
+    (tmin, tmax, mmin, mmax) = boundarycheck(
+        indmin, indmax, collect(1:length(x)), x, x, 2)
+    
+    # construct the interpolant and then pass the x-axis.
+    envmin = Spline1D(tmin, mmin; k=order)(t)
+    envmax = Spline1D(tmax, mmax; k=order)(t)
+
+    envmean = (envmin .+ envmax) ./ 2
+    amp = mean(abs.(envmax .- envmin)) / 2
+    envmean, numextr, numzer, amp
+end
+
+
 
 """
     indzers = extrzeros(x)
