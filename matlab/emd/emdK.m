@@ -81,7 +81,7 @@ end % emdK
 % BOUNDS_CHECK
 %   Determine if the bounds are reasonable. We have two scenarios we can
 %   test:
-%       0 - only check if outside the laplacian and Normal-Divergent case.
+%       0 - only check if outside the Laplacian and (B > 3) case.
 %       1 - get the tolerance from the GCM Confidence Interval and apply
 %           Shapiro-Wilk to determine if Normal.
 %

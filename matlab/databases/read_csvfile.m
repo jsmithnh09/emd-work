@@ -12,8 +12,15 @@ function [t, ppg, ecg] = read_csvfile(filename)
 % See Also: READTABLE
 
 % determine CSV directory relative to this script.
+name = 'bidmc-ppg-and-respiration-dataset-1.0.0';
 cwd = fileparts(mfilename('fullpath'));
-dir = fullfile(cwd, 'bidmc-ppg-and-respiration-dataset-1.0.0', 'bidmc_csv');
+dir = fullfile(cwd, name);
+if (exist(dir, 'dir') ~= 7) && ...
+        (exist(fullfile(cwd, [name, '.zip']), 'file') == 2)
+    % indicates the ZIP is available, but not unzipped yet...
+    unzip(fullfile(cwd, [name, '.zip']));
+end
+
 if (exist(dir, 'dir') ~= 7)
     error('CSV directory missing or the ZIP file hasn''t been unzipped.');
 end
