@@ -118,6 +118,24 @@ function stopemd(imf::AbstractVector)
 end
 
 """
+    (stop, envmean, muval) = stopsifting(imf, σ, σ₂, tol)
+
+Default stopping criterion for sifting.
+"""
+function stopsifting(imf::AbstractVector, σ::T, σ₂::T, tol::T) where {T<:AbstractFloat}
+    (envmean, numextr, numzer, amp) = meanamplitude(imf)
+    Sx = abs.(envmean) ./ amp
+    muval = mean(Sx)
+    flag1 = mean(Sx .> σ) > tol
+    flag2 = any(Sx .> σ₂)
+    flag3 = all(numextr .> 2)
+    stop = !((flag1 | flag2) & flag3)
+    stop, envmean, muval
+end
+
+
+
+"""
    oind = orthoindex(imf::AbstractVector)
 
 `orthoindex` computes the index of orthogonality based on the input
