@@ -8,6 +8,10 @@ function Y = emdH(IMF)
 	% hyothesis of intrinsic mode functions." IEEE Signal Processing Letters 23.7
 	% (2016): 924 - 928.
 
+    if isvector(IMF)
+        IMF = emd_rilling(IMF);
+    end
+
 	[r, c] = size(IMF);
 	if(r > c)
 		error('EMDH::incorrect row-transposition of IMFs.');

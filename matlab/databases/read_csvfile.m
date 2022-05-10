@@ -28,7 +28,7 @@ end
 % simplify the name parsing.
 filename = strrep(filename, '_Signals.csv', '');
 filename = [filename, '_Signals.csv'];
-sigfile = fullfile(dir, filename);
+sigfile = fullfile(dir, 'bidmc_csv', filename);
 if (exist(sigfile, 'file') ~= 2)
     error('Specified FILENAME "%s" is not a valid CSV.');
 end

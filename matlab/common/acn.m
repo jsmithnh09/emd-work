@@ -55,7 +55,7 @@ n = (n - mean(n))/std(n, 1);
 Ps = sum(x.^2);
 Pn = sum(n.^2);
 alpha = sqrt(Ps / (SNRlin * Pn));
-y = x + alpha * n;
+y = x + (alpha * n);
 return;
 end % acn
 
