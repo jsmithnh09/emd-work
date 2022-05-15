@@ -107,7 +107,7 @@ function boundarycheck(
 end
 
 """
-   stop = stopemd(opts::EMDConfig, imf::AbstractVector)
+   stop = stopemd(imf::AbstractVector)
 
 Returns a flag indicating if at least 3 extrema are present to continue 
 the decomposition.
