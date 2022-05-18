@@ -3,7 +3,6 @@ Empirical Mode Decomposition Package.
 """
 module EMD
 
-import DSP, Distributions, Interpolations
 using Statistics: mean
 using Dierckx: Spline1D
 
