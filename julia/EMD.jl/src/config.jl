@@ -1,7 +1,5 @@
 module Config
 
-using ..Util
-
 ### possible interpolation modes for EMD.
 @enum InterpMode Linear Pchip Cubic Spline
 
@@ -20,7 +18,7 @@ struct EMDConfig
     stop::Vector
     interp::InterpMode
     function EMDConfig(
-        x::Vector,
+        x::Vector;
         maxiters::Int=2_000, 
         maxmodes::Int=typemax(Int), 
         ndirs::Int=4, 

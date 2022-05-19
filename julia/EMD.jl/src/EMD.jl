@@ -9,6 +9,7 @@ using Dierckx: Spline1D
 ## include environment setup.
 include("util.jl")
 include("config.jl")
+include("emdbase.jl")
 
 EMD
 
