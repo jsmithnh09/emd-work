@@ -34,6 +34,7 @@ function emd(x::AbstractVector{T}; kwargs...) where {T <: AbstractFloat}
             end
         end
         push!(imf, m) # append IMF
+        k += 1        # increment the mode iteration.
         r -= m        # extract mode from input.
         curiter = 0   # reset the sifting iteration.
     end

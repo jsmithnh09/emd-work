@@ -22,7 +22,7 @@ struct EMDConfig
     function EMDConfig(
         x::Vector;
         maxiters::Int=2_000, 
-        maxmodes::Int=typemax(Int), 
+        maxmodes::Int=0, 
         ndirs::Int=4, 
         stop::Vector=[0.05, 0.5, 0.05], 
         interp::InterpMode=Cubic
