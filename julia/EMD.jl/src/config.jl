@@ -1,5 +1,7 @@
 module Config
 
+export InterpMode, EMDConfig
+
 ### possible interpolation modes for EMD.
 @enum InterpMode Linear Pchip Cubic Spline
 
