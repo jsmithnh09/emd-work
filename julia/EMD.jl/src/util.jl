@@ -1,6 +1,7 @@
 module Util
 
-import Dierckx: Spline1D
+using Statistics: mean
+using Dierckx: Spline1D
 
 export stopemd, stopsifting, meanamplitude, boundarycheck, extrminmax, extrzeros
 
@@ -233,8 +234,9 @@ function meanamplitude(x::AbstractVector, order::Int=3)
     indzer = extrzeros(x)
     numextr = length(indmin) + length(indmax)
     numzer = length(indzer)
+    t = collect(1:length(x))
     (tmin, tmax, mmin, mmax) = boundarycheck(
-        indmin, indmax, collect(1:length(x)), x, x, 2)
+        indmin, indmax, t, x, x, 2)
     
     # construct the interpolant and then pass the x-axis.
     envmin = Spline1D(tmin, mmin; k=order)(t)
