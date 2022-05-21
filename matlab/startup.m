@@ -8,7 +8,7 @@ function startup
 
 [~] = fprintf('*** emd-work Configuration ***\n');
 basedir = fileparts(mfilename('fullpath'));
-tbxlist = {'common', 'emd', 'ggd'};
+tbxlist = {'common', 'emd', 'ggd', 'databases'};
 
 for iTbx = 1:length(tbxlist)
     tbxdir = fullfile(basedir, tbxlist{iTbx});

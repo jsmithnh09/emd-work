@@ -52,6 +52,16 @@ testenv.signals(2).input = wnoise(4, testenv.N);
 testenv.signals(2).label = 'Doppler';
 testenv.signals(2).filters = filt_struct;
 
+% pull in an ECG signal
+[t, ecg, ~] = read_csvfile('bidmc_01');
+fs = 1/(t(2)-t(1));
+start = 3 * fs; % determine start point (arbitrary... 3 seconds?)
+stop = start + (2^testenv.N); % keep it the same length as the other test signals.
+ecg = ecg(start:stop);
+
+testenv.signals(3).input = ecg;
+testenv.signals(3).label = 'ECG';
+testenv.signals(3).filters = filt_struct;
 
 fprintf(1, '%s\n', repmat('*', 40, 1));
 fprintf(1, ' Test started: %s \n', datestr(now, 'dd-mmm-yyyy HH:MM PM'));
