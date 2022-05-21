@@ -57,7 +57,7 @@ testenv.signals(2).filters = filt_struct;
 fs = 1/(t(2)-t(1));
 start = 3 * fs; % determine start point (arbitrary... 3 seconds?)
 stop = start + (2^testenv.N); % keep it the same length as the other test signals.
-ecg = ecg(start:stop);
+ecg = ecg(start:stop-1);
 
 testenv.signals(3).input = ecg;
 testenv.signals(3).label = 'ECG';
