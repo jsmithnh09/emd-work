@@ -2,6 +2,8 @@ module Util
 
 import Dierckx: Spline1D
 
+export stopemd, stopsifting, meanamplitude, boundarycheck, extrminmax, extrzeros
+
 """
     y = fliplr(x)
 
@@ -33,7 +35,7 @@ function boundarycheck(
         else
             lmax = fliplr(indmax[1:min(end, nbsym)])
             lmin = vcat(fliplr(indmin[1:min(end, nbsym-1)]), 1)
-            lsym = 1.
+            lsym = 1
         end
     else
         if (x[1] < x[indmax[1]])
@@ -43,7 +45,7 @@ function boundarycheck(
         else
             lmax = vcat(fliplr(indmax[1:min(end, nbsym-1)]), 1)
             lmin = fliplr(indmin[1:min(end, nbsym)])
-            lsym = 1.
+            lsym = 1
         end
     end
     if (indmax[end] < indmin[end])
@@ -77,7 +79,7 @@ function boundarycheck(
         else
             lmin = fliplr(indmin[1:min(end,nbsym)])
         end
-        lsym = 1.
+        lsym = 1
         tlmin = 2 .* t[lsym] .- t[lmin]
         tlmax = 2 .* t[lsym] .- t[lmax]
     end
@@ -113,7 +115,7 @@ Returns a flag indicating if at least 3 extrema are present to continue
 the decomposition.
 """
 function stopemd(imf::AbstractVector)
-    (indmin, indmax) = extr(imf)
+    (indmin, indmax) = extrminmax(imf)
     Bool(length(indmin) + length(indmax) < 3)
 end
 
@@ -163,9 +165,9 @@ domain `t`. min/max comparison attempts to match MATLAB behavior.
 """
 function extrminmax(x::AbstractVector)
     dx = diff(x)
-    m = length(dx)
-    d1 = dx[1:m-1]
-    d2 = dx[2:m]
+    m, n = length(x), length(dx)
+    d1 = dx[1:n-1]
+    d2 = dx[2:n]
     bad = (dx .== 0)
     indmin = findall((d1.*d2 .< 0) .& (d1 .< 0)) .+ 1
     indmax = findall((d1.*d2 .< 0) .& (d1 .> 0)) .+ 1
@@ -196,14 +198,14 @@ function extrminmax(x::AbstractVector)
         if lh > 0
             for k = 1:lh
                 # attempting to match rounding in MATLAB. 0.5 corner-case.
-                half = (head[k] + tail[k]) / 2
-                half = half == 0.5 ? Int(1) : round(Int, half)
-                if d[head[k]-1] > 0
-                    if d[tail[k]] < 0
+                if dx[head[k]-1] > 0
+                    if dx[tail[k]] < 0
+                        half = round((head[k] + tail[k]) / 2, RoundNearestTiesUp)
                         append!(imax, half)
                     end
                 else
-                    if d[tail[k]] > 0
+                    if dx[tail[k]] > 0
+                        half = round((head[k] + tail[k]) / 2, RoundNearestTiesUp)
                         append!(imin, half)
                     end
                 end

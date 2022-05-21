@@ -7,8 +7,10 @@ using Statistics: mean
 using Dierckx: Spline1D
 
 ## include environment setup.
-include("util.jl")
 include("config.jl")
+include("util.jl")
+
+using ..Util, ..Config
 
 export emd
 
@@ -27,7 +29,7 @@ function emd(x::AbstractVector{T}; kwargs...) where {T <: AbstractFloat}
     r = copy(x)
     imf = Vector{Vector{T}}()
 
-    while (!(stopemd(r, cfg.ndirs)) && (k < cfg.maxmodes+1 || cfg.maxmodes == 0))
+    while (!(stopemd(r)) && (k < cfg.maxmodes+1 || cfg.maxmodes == 0))
         m = copy(r)
         (stopsift, μenv, _) = stopsifting(m, cfg.stop[1], cfg.stop[2], cfg.stop[3])
         
