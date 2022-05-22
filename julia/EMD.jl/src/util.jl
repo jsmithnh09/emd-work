@@ -126,8 +126,8 @@ end
 
 Default stopping criterion for sifting.
 """
-function stopsifting(imf::AbstractVector, σ::T, σ₂::T, tol::T) where {T<:AbstractFloat}
-    (envmean, numextr, numzer, amp) = meanamplitude(imf)
+function stopsifting(imf::AbstractVector, σ::T, σ₂::T, tol::T; order::Int=3) where {T<:AbstractFloat}
+    (envmean, numextr, numzer, amp) = meanamplitude(imf, order=order)
     Sx = abs.(envmean) ./ amp
     muval = mean(Sx)
     flag1 = mean(Sx .> σ) > tol
@@ -230,7 +230,7 @@ Computes the mean of the envelopes, the mode amplitude estimate, and the number
 of extrema, including zeros. String should indicate "cubic", "linear", etc.
 """
 
-function meanamplitude(x::AbstractVector, order::Int=3)
+function meanamplitude(x::AbstractVector; order::Int=3)
     (indmin, indmax) = extrminmax(x)
     indzer = extrzeros(x)
     numextr = length(indmin) + length(indmax)

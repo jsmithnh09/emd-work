@@ -28,12 +28,12 @@ function emd(x::AbstractVector{T}; kwargs...) where {T <: AbstractFloat}
 
     while (!(stopemd(r)) && (k < cfg.maxmodes+1 || cfg.maxmodes == 0))
         m = copy(r)
-        (stopsift, μenv, _) = stopsifting(m, cfg.stop[1], cfg.stop[2], cfg.stop[3])
+        (stopsift, μenv, _) = stopsifting(m, cfg.stop[1], cfg.stop[2], cfg.stop[3], order=cfg.interp)
         
         # sift loop
         while ((!stopsift) && (curiter < cfg.maxiters))
             m -= μenv
-            (stopsift, μenv, _) = stopsifting(m, cfg.stop[1], cfg.stop[2], cfg.stop[3])
+            (stopsift, μenv, _) = stopsifting(m, cfg.stop[1], cfg.stop[2], cfg.stop[3], order=cfg.interp)
             curiter += 1
             
             # force sift stoppage in case there were too many iterations.
@@ -51,9 +51,6 @@ function emd(x::AbstractVector{T}; kwargs...) where {T <: AbstractFloat}
     end
     imf
 end # emd
-
-
-
 
 EMD
 
