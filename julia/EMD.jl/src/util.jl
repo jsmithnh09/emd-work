@@ -28,7 +28,7 @@ function boundarycheck(
     ) where {T<:Int}
     length(indmin) + length(indmax) ≥ 3 || error("EMD: boundscheck: not enough extrema.")
     lx = length(x)
-    if (indmax[1] > indmin[1])
+    if (indmax[1] < indmin[1])
         if (x[1] > x[indmin[1]])
             lmax = fliplr(indmax[2:min(end, nbsym+1)])
             lmin = fliplr(indmin[1:min(end, nbsym)])
@@ -74,6 +74,7 @@ function boundarycheck(
     tlmax = 2 .* t[lsym] .- t[lmax]
     trmin = 2 .* t[rsym] .- t[rmin]
     trmax = 2 .* t[rsym] .- t[rmax]
+
     if (tlmin[1] > t[1]) || (tlmax[1] > t[1])
         if (lsym == indmax[1])
             lmax = fliplr(indmax[1:min(end,nbsym)])
@@ -104,7 +105,7 @@ function boundarycheck(
     tmin = vcat(tlmin, t[indmin], trmin)
     tmax = vcat(tlmax, t[indmax], trmax)
     zmin = vcat(zlmin, z[indmin], zrmin)
-    zmax = vcat(zlmax, t[indmax], zrmax)
+    zmax = vcat(zlmax, z[indmax], zrmax)
 
     tmin, tmax, zmin, zmax         
 end
