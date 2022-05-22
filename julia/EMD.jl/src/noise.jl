@@ -23,7 +23,7 @@ function acn!(x::AbstractVector, dBsnr::AbstractFloat, color::String="white")
         W = fft(w, (1,))
         fv = collect(Int, 1:M)
         W = W[fv]
-        W .*= fv.^α
+        W = W .* (fv.^α)
         # even or odd, in/exclude Nyquist when mirroring.
         if (rem(N,2) == 1)
             W = vcat(W, conj.(W[end:-1:2]))
