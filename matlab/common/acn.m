@@ -11,6 +11,13 @@ function y = acn(x, SNRdB, type)
 %       'VIOLET'    -- or purple, same as acoustic thermal noise in water.
 %       'PINK'      -- reference noise in audio engineering.
 %
+% Spectral manipulation based off of alpha scaling described with [1].
+%
+% References:
+% [1] H. Zhivomirov. A Method for Colored Noise Generation. Romanian Journal 
+%     of Acoustics and Vibration, ISSN: 1584-7284, Vol. XV, No. 1, pp. 14-19, 2018. 
+%     (http://rjav.sra.ro/index.php/rjav/article/view/40/29)
+%
 % Contact: Jordan R. Smith
 
 if (~ischar(type))
