@@ -244,7 +244,10 @@ function meanamplitude(x::AbstractVector, order::Int=3)
     envmax = Spline1D(tmax, mmax; k=order)(t)
 
     envmean = (envmin .+ envmax) ./ 2
-    amp = mean(abs.(envmax .- envmin)) / 2
+    
+    # in MATLAB, this was mean(abs(envmax-envmin),1)/2, but since dim=1,
+    # this is effectively a meaningless call since they're scalars.
+    amp = abs.(envmax .- envmin) ./ 2
     envmean, numextr, numzer, amp
 end
 
