@@ -103,45 +103,50 @@ tol = env.params.tolerance;
 
 % no parallel-processing, conventional for-loop testing.
 for snr_idx = 1:length(env.params.snr)
-    fprintf(1, 'Testing SNR: %.3g...', env.params.snr)
-    for filt_idx = 1:length(env.filters)
-        filter_func = env.filters(filt_idx).func;
-        filter_name = env.filters(filt_idx).label;
-        mcIdx = 1;
-        [mcSNR, mcMSE, sigma, ci] = deal([]);
+    try
+        fprintf(1, 'Testing SNR: %.3g...', env.params.snr)
+        for filt_idx = 1:length(env.filters)
+            filter_func = env.filters(filt_idx).func;
+            filter_name = env.filters(filt_idx).label;
+            mcIdx = 1;
+            [mcSNR, mcMSE, sigma, ci] = deal([]);
 
-        while(1)
+            while(1)
 
-            % generate/apply noise with SNRdB and noise-type.
-            xn = acn(xin, snr(snr_idx), ntype);
+                % generate/apply noise with SNRdB and noise-type.
+                xn = acn(xin, snr(snr_idx), ntype);
 
-            % extract the IMF and perform de-noising.
-            ximf = emd_rilling(xn);
-            try
-                yout = filter_func(ximf);
-            catch ME
-                error('test_harness:routine:: "%s" filter error SNR=%g Monte Carlo #(%d):\n%s', ...
-                    filter_name, snr(snr_idx), mcIdx, ME.message);
-            end
+                % extract the IMF and perform de-noising.
+                ximf = emd_rilling(xn);
+                try
+                    yout = filter_func(ximf);
+                catch ME
+                    error('test_harness:routine:: "%s" filter error SNR=%g Monte Carlo #(%d):\n%s', ...
+                        filter_name, snr(snr_idx), mcIdx, ME.message);
+                end
 
-            % tracking performance/CI based on SNR.
-            [mcSNR(mcIdx), mcMSE(mcIdx)] = perf(xin, yout);
-            sigma(mcIdx) = std(mcSNR);
+                % tracking performance/CI based on SNR.
+                [mcSNR(mcIdx), mcMSE(mcIdx)] = perf(xin, yout);
+                sigma(mcIdx) = std(mcSNR);
 
-            % check if confidence limit exceeds interval.
-            ci(mcIdx) = 1 - 2*qfunc(sqrt(mcIdx)/sigma(mcIdx)*tol);
-            if (ci(mcIdx) >= 0.95)
-                break;
-            else
-                mcIdx = mcIdx + 1;
-                continue;
-            end % if
-        end % while
+                % check if confidence limit exceeds interval.
+                ci(mcIdx) = 1 - 2*qfunc(sqrt(mcIdx)/sigma(mcIdx)*tol);
+                if (ci(mcIdx) >= 0.95)
+                    break;
+                else
+                    mcIdx = mcIdx + 1;
+                    continue;
+                end % if
+            end % while
 
-        % store the results.
-        env.signals(signal_idx).filters(filt_idx).result.snr(snr_idx) = mean(mcSNR);
-        env.signals(signal_idx).filters(filt_idx).result.mse(snr_idx) = mean(mcMSE);
-    end % filter-for
+            % store the results.
+            env.signals(signal_idx).filters(filt_idx).result.snr(snr_idx) = mean(mcSNR);
+            env.signals(signal_idx).filters(filt_idx).result.mse(snr_idx) = mean(mcMSE);
+        end % filter-for
+    catch ME
+        fprintf(1, 'ERROR\n');
+        rethrow(ME);
+    end
     fprintf(1, 'done\n');
 end % SNR-for
 

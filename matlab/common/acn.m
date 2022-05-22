@@ -28,226 +28,61 @@ if (~isvector(x))
     error('common:acn:InvalidInput', ...
         'Input SIGNAL must be a unidimensional signal.');
 end
-npts = numel(x);
+N = numel(x);
 
 % generate the noise.
 switch type
     case 'white'
-        n = randn(npts,1);
+        alpha = 0;
     case 'pink'
-        n = pinknoise(npts);
+        alpha = -1;
     case {'violet', 'purple'}
-        n = violetnoise(npts);
+        alpha = 2;
     case 'red'
-        n = rednoise(npts);
+        alpha = -2;
     case 'blue'
-        n = bluenoise(npts);
+        alpha = 1;
     otherwise
         error('common:acn:InvalidInput', ...
             'Unrecognized noise type "%s".', type);
 end % switch
 
-% unity variance, zero-mean.
+% convert PSD to Amplitude Density (div.by 2.)
+alpha = alpha / 2;
+w = randn(N,1);
+
+% manipulate spectral roll-off in the left-sided spectrum. no need to scale
+% since we'll mirror before going back to time.
+if (alpha ~= 0)
+    M = ceil((N/2)+1);      % FFT point length
+    W = fft(w);             % get the frequency content
+    fvec = (1:M).';         % freq. indexes
+    W = W(fvec);            % single-sided spectrum
+    W = W.*(fvec.^alpha);   % spectral amp. proportional to factor f^alpha
+
+    % even-length FFT, include Nyquist point.
+    if (rem(N, 2))
+        W = [W; conj(W(end:-1:2))];
+    else
+        % odd length FFT, exclude Nyquist.
+        W = [W; conj(W(end-1:-1:2))];
+    end
+    n = real(ifft(W));
+else
+    % white-noise case.
+    n = w;
+end
+
+% zero mean, unity variance.
+n = n - mean(n);
+n = n / std(n);
 n = n(:);
-n = (n - mean(n))/std(n, 1);
 
 % delegate the appropriate noise level. Ps/Pn drops (1/N) term.
 Ps = sum(x.^2);
 Pn = sum(n.^2);
-alpha = sqrt(Ps / (SNRlin * Pn));
-y = x + (alpha * n);
+beta = sqrt(Ps / (SNRlin * Pn));
+y = x + (beta * n);
 return;
+
 end % acn
-
-%**************************************************************************
-%               rednoise
-%**************************************************************************
-function y = rednoise(N)
-
-% function: y = rednoise(N)
-% N - number of samples to be returned in a row vector.
-% Y - a row vector of red (Brownian) noise samples.
-%
-% the function generates a sequence of red (Brownian) noise samples.
-% In terms of power at a constant bandwidth, red noise falls off at 6 dB/oct, i.e. 20 dB/dec.
-
-% define the length of the vector and ensure that the M is even.
-if rem(N, 2)
-    M = N+1;
-else
-    M = N;
-end
-
-% generate white noise
-x = randn(1, M);
-
-% FFT
-X = fft(x);
-
-% prep a vec with freq indexes
-nPts = M/2 + 1;
-n = 1:nPts;
-
-% manipulate left half of the spectrum so the PSD is propertional to the
-% frequency by a factor of 1/(f^2), or the amplitudes are proportional to 1/f
-X = X(1:nPts);
-X = X./n;
-
-% prep the right half of the spectrum, a conj. copy of the left
-% except the DC component and the Nyquist component, (0 < x < Nq)
-X = [X conj(X(end-1:-1:2))];
-
-% IFFT
-y = real(ifft(X));
-
-% ensure that the length of y is N.
-y = y(1, 1:N);
-
-end % rednoise
-
-%**************************************************************************
-%                           bluenoise
-%**************************************************************************
-function y = bluenoise(N)
-
-% function: y = bluenoise(N) 
-% N - number of samples to be returned in a row vector
-% y - a row vector of blue noise samples
-
-% The function generates a sequence of blue noise samples. 
-% In terms of power at a constant bandwidth, blue noise increase in at 3 dB/oct, i.e. 10 dB/dec. 
-
-% difine the length of the vector and
-% ensure that the M is even, this will simplify the processing
-if rem(N, 2)
-    M = N+1;
-else
-    M = N;
-end
-
-% generate white noise 
-x = randn(1, M);
-
-% FFT
-X = fft(x);
-
-% prepare a vector with frequency indexes 
-nPts = M/2 + 1;             % number of the unique fft points
-n = 1:nPts;                 % vector with frequency indexes 
-
-% manipulate the left half of the spectrum so the PSD
-% is proportional to the frequency by a factor of 1/f, 
-% i.e. the amplitudes are proportional to 1/sqrt(f)
-X = X(1:nPts);  
-X = X.*sqrt(n);
-
-% prepare the right half of the spectrum - a conjugate copy of the left one,
-% except the DC component and the Nyquist component - they are unique
-% and reconstruct the whole spectrum
-X = [X conj(X(end-1:-1:2))];
-
-% IFFT
-y = real(ifft(X));
-
-% ensure that the length of y is N
-y = y(1, 1:N);
-
-end % bluenoise
-
-%**************************************************************************
-%               violetnoise
-%**************************************************************************
-function y = violetnoise(N)
-
-% function: y = violetnoise(N) 
-% N - number of samples to be returned in a row vector
-% y - a row vector of violet noise samples
-
-% The function generates a sequence of violet (purple) noise samples. 
-% In terms of power at a constant bandwidth, violet noise increase in at 6 dB/oct, i.e. 20 dB/dec. 
-
-% difine the length of the vector and
-% ensure that the M is even, this will simplify the processing
-if rem(N, 2)
-    M = N+1;
-else
-    M = N;
-end
-
-% generate white noise 
-x = randn(1, M);
-
-% FFT
-X = fft(x);
-
-% prepare a vector with frequency indexes 
-nPts = M/2 + 1;     % number of the unique fft points
-n = 1:nPts;         % vector with frequency indexes 
-
-% manipulate the left half of the spectrum so the PSD
-% is proportional to the frequency by a factor of f^2, 
-% i.e. the amplitudes are proportional to f
-X = X(1:nPts);
-X = X.*n;
-
-% prepare the right half of the spectrum - a conjugate copy of the left one,
-% except the DC component and the Nyquist component - they are unique
-% and reconstruct the whole spectrum
-X = [X conj(X(end-1:-1:2))];
-
-% IFFT
-y = real(ifft(X));
-
-% ensure that the length of y is N
-y = y(1, 1:N);
-
-
-end % violetnoise
-%**************************************************************************
-%               pinknoise
-%**************************************************************************
-function y = pinknoise(N)
-
-% function: y = pinknoise(N) 
-% N - number of samples to be returned in a row vector
-% y - a row vector of pink (flicker) noise samples
-
-% The function generates a sequence of pink (flicker) noise samples. 
-% In terms of power at a constant bandwidth, pink noise falls off at 3 dB/oct, i.e. 10 dB/dec. 
-
-% define the length of the vector and
-% ensure that the M is even, this will simplify the processing
-if rem(N, 2)
-    M = N+1;
-else
-    M = N;
-end
-
-% generate white noise
-x = randn(1, M);
-
-% FFT
-X = fft(x);
-
-% prepare a vector with frequency indexes 
-nPts = M/2 + 1;     % number of the unique fft points
-n = 1:nPts;         % vector with frequency indexes 
-
-% manipulate the left half of the spectrum so the PSD
-% is proportional to the frequency by a factor of 1/f, 
-% i.e. the amplitudes are proportional to 1/sqrt(f)
-X = X(1:nPts);      
-X = X./sqrt(n);
-
-% prepare the right half of the spectrum - a conjugate copy of the left one,
-% except the DC component and the Nyquist component - they are unique
-% and reconstruct the whole spectrum
-X = [X conj(X(end-1:-1:2))];
-
-% IFFT
-y = real(ifft(X));
-
-% ensure that the length of y is N
-y = y(1, 1:N);
-
-end % pinknoise
