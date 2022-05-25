@@ -19,7 +19,7 @@ function acn!(x::AbstractVector, dBsnr::AbstractFloat, color::String="white")
     w = randn(N)
     # manipulate spectral roll-off for left-side of spectrum.
     if (color != "white")
-        M = ceil((N/2)+1)
+        M = ceil(Int, (N/2)+1)
         W = fft(w, (1,))
         fv = collect(Int, 1:M)
         W = W[fv]
