@@ -5,11 +5,14 @@ Pkg.activate(".")
 cd("src")
 using EMD.Util
 using DelimitedFiles
+using Wavelets: testfunction
 
 T = Float64
 
 # pull in the components. 2^12 should yield 3 IMFs.
 x = vec(readdlm("heavysine12.txt", T))
+x = testfunction(2^12, "Doppler")
+
 maxmodes = 0
 maxiters = Int(2_000)
 

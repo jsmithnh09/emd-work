@@ -252,6 +252,15 @@ function meanamplitude(x::AbstractVector; order::Int=3)
     envmean, numextr, numzer, amp
 end
 
+function sparse_spline(x::AbstractArray, v::AbstractArray, Xq::AbstractArray)
+    # parabolic interpolation
+    N = length(x)
+    d, dx = ones(N), diff(x)
+    dvdx = diff(v) ./ dx
+end
+    
+
+
 
 
 """
