@@ -132,8 +132,9 @@ function stopsifting(imf::AbstractVector, σ::T, σ₂::T, tol::T; order::Int=3)
     muval = mean(Sx)
     flag1 = mean(Sx .> σ) > tol
     flag2 = any(Sx .> σ₂)
-    flag3 = all(numextr .> 2)
-    stop = !((flag1 | flag2) & flag3)
+    flag3 = (numextr > 2)
+    flag4 = (abs(numzer - numextr) > 1)
+    stop = !((flag1 | flag2) & flag3) && !(flag4)
     stop, envmean, muval
 end
 

@@ -35,18 +35,13 @@ function emd(x::AbstractVector{T}; kwargs...) where {T <: AbstractFloat}
             m -= μenv
             (stopsift, μenv, _) = stopsifting(m, cfg.stop[1], cfg.stop[2], cfg.stop[3], order=cfg.interp)
             curiter += 1
-            
-            # force sift stoppage in case there were too many iterations.
-            if ((curiter == cfg.maxiters-1) && (curiter > 100))
-                break
-            end
         end
         push!(imf, m) # append IMF
         k += 1        # increment the mode iteration.
         r -= m        # extract mode from input.
         curiter = 0   # reset the sifting iteration.
     end
-    if (any(r .> 0))
+    if (any(r != 0))
         push!(imf, r) # append residual if any fluctuations are still present.
     end
     imf
