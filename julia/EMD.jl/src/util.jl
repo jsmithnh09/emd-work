@@ -234,8 +234,8 @@ function meanamplitude(x::AbstractVector; order::Int=3)
         indmin, indmax, t, x, x, 2)
     
     # construct the interpolant and then pass the x-axis. Corner check for end-of-knot condition.
-    envmin = (length(mmin) == 3) ? sparse_spline(tmin, mmin, t) : Spline1D(tmin, mmin; k=order)(t)
-    envmax = (length(mmax) == 3) ? sparse_spline(tmax, mmax, t) : Spline1D(tmax, mmax; k=order)(t)
+    envmin = (length(mmin) == 3) ? parabolaspline(tmin, mmin, t) : Spline1D(tmin, mmin; k=order)(t)
+    envmax = (length(mmax) == 3) ? parabolaspline(tmax, mmax, t) : Spline1D(tmax, mmax; k=order)(t)
 
     envmean = (envmin .+ envmax) ./ 2
     
@@ -249,10 +249,9 @@ end
 """
     Vq = sparsespline(x::AbstractArray, v::AbstractArray, Xq::AbstractArray)
 
-Computes cubic spline with sparse data, i.e. length(x) = 3. This evaluates the
-not-a-knot end conditions specifically.
+Computes cubic spline with parabolic data, i.e. length(x) = 3.
 """
-function sparse_spline(x::AbstractArray, v::AbstractArray, Xq::AbstractArray)
+function parabolaspline(x::AbstractArray, v::AbstractArray, Xq::AbstractArray)
     M = length(Xq)
     dx, dv = diff(x), diff(v)
     dx2 = x[3] - x[1]
