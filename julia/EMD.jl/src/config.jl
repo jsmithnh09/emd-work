@@ -1,7 +1,3 @@
-module Config
-
-export EMDConfig
-
 """
     EMDConfig(Opts...)
 EMDConfig sets up the configuration for a decomposition. This
@@ -47,5 +43,3 @@ function Base.show(io::IO, cfg::EMDConfig)
     print(io, "stop     = ", cfg.stop, "\n") 
     print(io, "interp   = ", InterpMode[cfg.interp], "\n")
 end
-
-end # module

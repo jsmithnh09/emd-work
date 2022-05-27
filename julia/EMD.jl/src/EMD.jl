@@ -3,13 +3,15 @@ Empirical Mode Decomposition Package.
 """
 module EMD
 
+
+using Statistics: mean
+using Dierckx: Spline1D
+
+export emd
+
 ## include environment setup.
 include("config.jl")
 include("util.jl")
-
-using ..Util, ..Config
-
-export emd
 
 """
     imf = emd(x; kwargs...)
@@ -46,7 +48,5 @@ function emd(x::AbstractVector{T}; kwargs...) where {T <: AbstractFloat}
     end
     imf
 end # emd
-
-EMD
 
 end # module

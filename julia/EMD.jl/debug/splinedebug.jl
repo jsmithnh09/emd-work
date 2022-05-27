@@ -13,10 +13,8 @@ Vc = vcat(V[1], dvdx)
 Vc[3] = (diff(dvdx) / dx2)[1] # d²v / dx²
 Vc[2] -= Vc[3]*dx[1]
 
-
 bounds = (x[1], x[3])
 coeffs = Vc[end:-1:1]
-
 
 ## Perform the piecewise interpolation for k=3
 xs = collect(t) .- fill(bounds[1], M)

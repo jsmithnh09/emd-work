@@ -1,10 +1,3 @@
-module Util
-
-using Statistics: mean
-using Dierckx: Spline1D
-
-export stopemd, stopsifting, meanamplitude, boundarycheck, extrminmax, extrzeros
-
 """
     y = fliplr(x)
 
@@ -240,9 +233,9 @@ function meanamplitude(x::AbstractVector; order::Int=3)
     (tmin, tmax, mmin, mmax) = boundarycheck(
         indmin, indmax, t, x, x, 2)
     
-    # construct the interpolant and then pass the x-axis.
-    envmin = Spline1D(tmin, mmin; k=order)(t)
-    envmax = Spline1D(tmax, mmax; k=order)(t)
+    # construct the interpolant and then pass the x-axis. Corner check for end-of-knot condition.
+    envmin = (length(mmin) == 3) ? sparse_spline(tmin, mmin, t) : Spline1D(tmin, mmin; k=order)(t)
+    envmax = (length(mmax) == 3) ? sparse_spline(tmax, mmax, t) : Spline1D(tmax, mmax; k=order)(t)
 
     envmean = (envmin .+ envmax) ./ 2
     
@@ -252,16 +245,30 @@ function meanamplitude(x::AbstractVector; order::Int=3)
     envmean, numextr, numzer, amp
 end
 
+
+"""
+    Vq = sparsespline(x::AbstractArray, v::AbstractArray, Xq::AbstractArray)
+
+Computes cubic spline with sparse data, i.e. length(x) = 3. This evaluates the
+not-a-knot end conditions specifically.
+"""
 function sparse_spline(x::AbstractArray, v::AbstractArray, Xq::AbstractArray)
-    # parabolic interpolation
-    N = length(x)
-    d, dx = ones(N), diff(x)
-    dvdx = diff(v) ./ dx
+    M = length(Xq)
+    dx, dv = diff(x), diff(v)
+    dx2 = x[3] - x[1]
+    dvdx = dv ./ dx
+    Vc = vcat(v[1], dvdx)
+    Vc[3] = (diff(dvdx) / dx2)[1] # d²v / dx²
+    Vc[2] -= Vc[3]*dx[1]
+    bounds = (x[1], x[3])
+    coeffs = Vc[end:-1:1]
+    xs = Xq .- fill(bounds[1], M)
+    Vf = fill(coeffs[1], M)
+    @inbounds for i = 2:3
+        Vf = Vf .* xs + fill(coeffs[i], M)
+    end
+    Vf
 end
-    
-
-
-
 
 """
     indzers = extrzeros(x)
@@ -290,5 +297,3 @@ function extrzeros(x::AbstractVector)
     end
     indzer
 end
-
-end # module
