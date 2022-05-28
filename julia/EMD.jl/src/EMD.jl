@@ -27,11 +27,18 @@ function emd(x::AbstractVector{T}; kwargs...) where {T <: AbstractFloat}
     k, curiter = 1, 0
     r = copy(x)
     imf = Vector{Vector{T}}()
+    Xtol = √eps(eltype(x)) * maximum(abs, x)
+
 
     while (!(stopemd(r)) && (k < cfg.maxmodes+1 || cfg.maxmodes == 0))
         m = copy(r)
         (stopsift, μenv, _) = stopsifting(m, cfg.stop[1], cfg.stop[2], cfg.stop[3], order=cfg.interp)
-        
+
+        # check for noise floor extrema prior to sifting loop.
+        if (maximum(abs, m) < Xtol)
+            break
+        end
+
         # sift loop
         while ((!stopsift) && (curiter < cfg.maxiters))
             m -= μenv

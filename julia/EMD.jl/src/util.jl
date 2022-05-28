@@ -249,24 +249,25 @@ end
 """
     Vq = sparsespline(x::AbstractArray, v::AbstractArray, Xq::AbstractArray)
 
-Computes cubic spline with parabolic data, i.e. length(x) = 3.
+Computes cubic spline with parabolic data and end-of-knot condition.
+See De Boor, C. (1978). A practical guide to splines (Vol. 27, p. 325). 
+New York: springer-verlag.
 """
-function parabolaspline(x::AbstractArray, v::AbstractArray, Xq::AbstractArray)
+function parabolaspline(X::AbstractArray, V::AbstractArray, Xq::AbstractArray)
     M = length(Xq)
-    dx, dv = diff(x), diff(v)
-    dx2 = x[3] - x[1]
+    dx, dv = diff(X), diff(V)
+    dx2 = X[3] - X[1] # skipping second "tau" point
     dvdx = dv ./ dx
-    Vc = vcat(v[1], dvdx)
-    Vc[3] = (diff(dvdx) / dx2)[1] # d²v / dx²
-    Vc[2] -= Vc[3]*dx[1]
-    bounds = (x[1], x[3])
-    coeffs = Vc[end:-1:1]
-    xs = Xq .- fill(bounds[1], M)
-    Vf = fill(coeffs[1], M)
-    @inbounds for i = 2:3
-        Vf = Vf .* xs + fill(coeffs[i], M)
+    coeffs = zeros(3) # ax² + bx + c
+    coeffs[1] = (diff(dvdx) / dx2)[1]
+    coeffs[2] = dvdx[1] - coeffs[1]*dx[1]
+    coeffs[3] = V[1]
+    Vq = fill(coeffs[1], M)
+    xs = collect(Xq) .- fill(X[1], M)
+    for i = 2:3
+        Vq = Vq .* xs + fill(coeffs[i], M)
     end
-    Vf
+    Vq
 end
 
 """

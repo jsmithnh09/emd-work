@@ -3,7 +3,7 @@
 using Pkg
 Pkg.activate(".")
 cd("src")
-using EMD.Util
+using EMD
 using DelimitedFiles
 using Wavelets: testfunction
 
@@ -23,14 +23,14 @@ r = copy(x)
 
 imf = Vector{Vector{T}}()
 
-while(!stopemd(r) && (maxmodes == 0 || k < maxmodes + 1))
+while(!EMD.stopemd(r) && (maxmodes == 0 || k < maxmodes + 1))
     m = copy(r)
-    (stopsift, μenv, _) = stopsifting(m, 0.05, 0.5, 0.05)
+    (stopsift, μenv, _) = EMD.stopsifting(m, 0.05, 0.5, 0.05)
 
     # sift loop
     while ((!stopsift) && (curiter < maxiters))
         m -= μenv
-        (stopsift, μenv, _) = stopsifting(m, 0.05, 0.5, 0.05)
+        (stopsift, μenv, _) = EMD.stopsifting(m, 0.05, 0.5, 0.05)
         curiter += 1
     end
     push!(imf, m)
