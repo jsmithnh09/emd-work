@@ -1,37 +1,81 @@
 using Pkg
 Pkg.activate(".")
 using EMD
-using DelimitedFiles: readdlm
-using Dierckx: Spline1D
-using Test
 
+
+# first sifting iteration variables stored in MATLAB, comparing Spline1D operation.
 fpath = joinpath(@__DIR__, "signals")
-t = collect(1:4096)
 
-# manually confirmed the indices for minima/maxima matched MATLAB integers.
-X = vec(readdlm(joinpath(fpath, "doppler.txt")))
-(indmin, indmax) = EMD.extrminmax(X)
-(jtmin, jtmax, jmmin, jmmax) = EMD.boundarycheck(indmin, indmax, t, X, X, 2)
+x = Array{Float64, 1}(undef, 4096)
+read!(joinpath(fpath, "doppler.bin"), x)
+
+mat_zmin = Vector{Float64}(undef, 24)
+mat_zmax = Vector{Float64}(undef, 24)
+read!(joinpath(fpath, "zmin.bin"), mat_zmin)
+read!(joinpath(fpath, "zmax.bin"), mat_zmax)
+
+mat_imf = Vector{Float64}(undef, 4096*4)
+read!(joinpath(fpath, "imf4x4096.bin"), mat_imf)
+mat_imf = reshape(mat_imf, (4096, 4))
+
+lx = length(x)
+t = collect(1:lx)
+fliplr(x) = x[end:-1:1]
+nbsym = 2
+z = copy(x)
+
+# manually confirmed this is correct.
+(indmin, indmax) = EMD.extrminmax(x)
 
 
-tmin = vec(readdlm(joinpath(fpath, "tmin_iter1.txt")))
-tmax = vec(readdlm(joinpath(fpath, "tmax_iter1.txt")))
-mmin = vec(readdlm(joinpath(fpath, "mmin_iter1.txt")))
-mmax = vec(readdlm(joinpath(fpath, "mmax_iter1.txt")))
+# first, check we're extracting the correct lmin/lmax/rmin/rmax indices.
+if (indmax[1] < indmin[1])
+    if (x[1] > x[indmin[1]])
+        lmax = fliplr(indmax[2:min(end, nbsym+1)])
+        lmin = fliplr(indmin[1:min(end, nbsym)])
+        lsym = copy(indmax[1])
+    else
+        lmax = fliplr(indmax[1:min(end, nbsym)])
+        lmin = vcat(fliplr(indmin[1:min(end, nbsym-1)]), 1)
+        lsym = 1
+    end
+else
+    if (x[1] < x[indmax[1]])
+        lmax = fliplr(indmax[1:min(end, nbsym)])
+        lmin = fliplr(indmin[2:min(end, nbsym+1)])
+        lsym = copy(indmin[1])
+    else
+        lmax = vcat(fliplr(indmax[1:min(end, nbsym-1)]), 1)
+        lmin = fliplr(indmin[1:min(end, nbsym)])
+        lsym = 1
+    end
+end
+if (indmax[end] < indmin[end])
+    if (x[end] < x[indmax[end]])
+        rmax = fliplr(indmax[max(end-nbsym+1, 1):end])
+        rmin = fliplr(indmin[max(end-nbsym, 1):end-1])
+        rsym = copy(indmin[end])
+    else
+        rmax = vcat(lx, fliplr(indmax[max(end-nbsym+2, 1):end]))
+        rmin = fliplr(indmin[max(end-nbsym+1, 1):end])
+        rsym = copy(lx)
+    end
+else
+    if (x[end] > x[indmin[end]])
+        rmax = fliplr(indmax[max(end-nbsym, 1):end-1])
+        rmin = fliplr(indmin[max(end-nbsym+1, 1):end])
+        rsym = copy(indmax[end])
+    else
+        rmax = fliplr(indmax[max(end-nbsym+1, 1):end])
+        rmin = vcat(lx, fliplr(indmin[max(end-nbsym+2, 1):end]))
+        rsym = copy(lx)
+    end
+end
 
-all(jtmin .== tmin)
-all(jtmax .== tmax)
-all(jmmin .== mmin) # ERROR!!!
-all(jmmax .== mmax)
+zlmax = z[lmax]
+zlmin = z[lmin]
+zrmax = z[rmax]
+zrmin = z[rmin]
 
-envmin = vec(readdlm(joinpath(fpath, "envmin_iter1.txt")))
-envmax = vec(readdlm(joinpath(fpath, "envmax_iter1.txt")))
-
-
-## check if the interpolation method matches MATLAB.
-jmin = Spline1D(tmin, mmin, k=3)(t)
-jmax = Spline1D(tmax, mmax, k=3)(t)
-
-mindiff = abs.(envmin - jmin)
-maxdiff = abs.(envmax - jmax)
-
+zmin = vcat(zlmin, z[indmin], zrmin)
+zmax = vcat(zlmax, z[indmax], zrmax)
