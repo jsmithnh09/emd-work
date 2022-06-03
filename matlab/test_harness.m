@@ -100,6 +100,7 @@ ntype = env.params.noisetype;
 xin = env.params.signal(signal_idx).input;
 snr = env.params.snr;
 tol = env.params.tolerance;
+mintrials = env.params.mintrials;
 
 % no parallel-processing, conventional for-loop testing.
 for snr_idx = 1:length(env.params.snr)
@@ -131,7 +132,7 @@ for snr_idx = 1:length(env.params.snr)
 
                 % check if confidence limit exceeds interval.
                 ci(mcIdx) = 1 - 2*qfunc(sqrt(mcIdx)/sigma(mcIdx)*tol);
-                if (ci(mcIdx) >= 0.95)
+                if (ci(mcIdx) >= 0.95) && (mcIdx > mintrials)
                     break;
                 else
                     mcIdx = mcIdx + 1;
