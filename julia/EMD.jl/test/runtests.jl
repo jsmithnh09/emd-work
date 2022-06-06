@@ -10,7 +10,7 @@ end
     for sig in (:Doppler, :HeaviSine, :Blocks, :Bumps)
         x = testfunction(2^14, "$(sig)")
         imf = emd(x)
-        @test isapprox(sum(imfs), x, rtol=1e-8)
+        @test isapprox(sum(imf), x, rtol=1e-8)
     end
 end
 
