@@ -3,6 +3,10 @@ function Y = emdHD(IMF,X)
 	% based on the Hausdorff distance between the input signal (prior to decomposition)
 	% and the corresponding IMFs. The first IMF with a minimum value after a local maxima
 	% is IMFr.
+    %
+    % If emdHD(IMF) is specified, the original input is inferred by summing
+    % the IMFs to reconstruct the input signal X, (within machine
+    % precision.)
 	%
 	% SEE ALSO: HausdorffDist.
 	%
@@ -13,7 +17,10 @@ function Y = emdHD(IMF,X)
 	[r c] = size(IMF);
 	if(r > c)
 		error('emdHD::incorrect IMF row-transposition.');
-	end
+    end
+    if (nargin == 1)
+        X = sum(IMF, 1);
+    end
 
 	for i = 1:r
 		HD(i) = HausdorffDist(X,IMF(i,:));
