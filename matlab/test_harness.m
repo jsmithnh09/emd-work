@@ -18,6 +18,10 @@ if (nargin < 1)
 end
 workdir = fileparts(mfilename('fullpath'));
 outfile = fullfile(workdir, results_filename);
+partialdir = fullfile(workdir, 'partial');
+if (exist(partialdir, 'dir') ~= 7)
+    mkdir(partialdir);
+end
 
 
 testenv = struct;                       % primary test container.
@@ -70,6 +74,14 @@ for testIdx = 1:length(testenv.signals)
     % indicate which signal.
     fprintf(1, 'Testing %s\n', testenv.signals(testIdx).label);
     testenv = test_routine(testenv, testIdx);
+
+    % because each of these signals can take a considerable amount of time,
+    % lets save out a partial file in case we need to stop at any point.
+    fname = sprintf('partial_signal%d_%s.mat', testIdx, ...
+        datestr(now, 'mm-dd-HHMMSS'));
+    save(fullfile(partialdir, fname), 'testenv', '-mat');
+
+
 end
 
 
@@ -143,6 +155,7 @@ for snr_idx = 1:length(env.params.snr)
             % store the results.
             env.signals(signal_idx).filters(filt_idx).result.snr(snr_idx) = mean(mcSNR);
             env.signals(signal_idx).filters(filt_idx).result.mse(snr_idx) = mean(mcMSE);
+
         end % filter-for
     catch ME
         fprintf(1, 'ERROR\n');
