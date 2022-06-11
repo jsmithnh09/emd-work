@@ -18,7 +18,7 @@ dir = fullfile(cwd, name);
 if (exist(dir, 'dir') ~= 7) && ...
         (exist(fullfile(cwd, [name, '.zip']), 'file') == 2)
     % indicates the ZIP is available, but not unzipped yet...
-    unzip(fullfile(cwd, [name, '.zip']));
+    unzip(fullfile(cwd, [name, '.zip']), cwd);
 end
 
 if (exist(dir, 'dir') ~= 7)

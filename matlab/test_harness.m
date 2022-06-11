@@ -44,11 +44,11 @@ filt_struct = struct('func', {@emdB, @emdK, @emdH, @emdHD}, ...
 
 
 % declare the signals that ought to be tested.
-testenv.signals(1).input = wnoise(3, testenv.N);
+testenv.signals(1).input = wnoise(3, testenv.params.N);
 testenv.signals(1).label = 'Heavy sine';
 testenv.signals(1).filters = filt_struct;
 
-testenv.signals(2).input = wnoise(4, testenv.N);
+testenv.signals(2).input = wnoise(4, testenv.params.N);
 testenv.signals(2).label = 'Doppler';
 testenv.signals(2).filters = filt_struct;
 
@@ -56,7 +56,7 @@ testenv.signals(2).filters = filt_struct;
 [t, ecg, ~] = read_csvfile('bidmc_01');
 fs = 1/(t(2)-t(1));
 start = 3 * fs; % determine start point (arbitrary... 3 seconds?)
-stop = start + (2^testenv.N); % keep it the same length as the other test signals.
+stop = start + (2^testenv.params.N); % keep it the same length as the other test signals.
 ecg = ecg(start:stop-1);
 
 testenv.signals(3).input = ecg;
@@ -97,7 +97,7 @@ function env = test_routine(env, signal_idx)
 % speed up execution, we don't want the compiler to memcpy the entire
 % container.
 ntype = env.params.noisetype;
-xin = env.params.signal(signal_idx).input;
+xin = env.signals(signal_idx).input;
 snr = env.params.snr;
 tol = env.params.tolerance;
 mintrials = env.params.mintrials;
@@ -105,10 +105,10 @@ mintrials = env.params.mintrials;
 % no parallel-processing, conventional for-loop testing.
 for snr_idx = 1:length(env.params.snr)
     try
-        fprintf(1, 'Testing SNR: %.3g...', env.params.snr)
-        for filt_idx = 1:length(env.filters)
-            filter_func = env.filters(filt_idx).func;
-            filter_name = env.filters(filt_idx).label;
+        fprintf(1, 'Testing SNR: %.3g...', env.params.snr(snr_idx))
+        for filt_idx = 1:length(env.signals(signal_idx).filters)
+            filter_func = env.signals(signal_idx).filters(filt_idx).func;
+            filter_name = env.signals(signal_idx).filters(filt_idx).label;
             mcIdx = 1;
             [mcSNR, mcMSE, sigma, ci] = deal([]);
 
