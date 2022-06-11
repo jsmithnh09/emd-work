@@ -30,7 +30,7 @@ end
 present = ismember(keys, fnames);
 if any(~present)
     error('optparse:InvalidValue', ...
-        'Unknown keyword(s) "%s".', strjoin(keys, ', '));
+        'Unknown keyword(s) "%s".', strjoin(keys(~present), ', '));
 end
 for iF = 1:numel(keys)
     defaults.(keys{iF}) = vals{iF};
