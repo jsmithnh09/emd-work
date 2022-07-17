@@ -74,12 +74,11 @@ function y = Zp(x, B)
     logb1 = sum( (abs(x).^B) .*  log(abs(x)) );
 
     num1 = ((2/n) * logb2) * ((1/n) * ab1)^2;
-    den1 = ((1/n) * ab1)^4;
-
     num2 = ((1/n) * logb1)*((1/n) * ab2)*((2/n) * ab1);
-    den2 = ((1/n) * ab1)^4;
+    den = ((1/n) * ab1)^4;
+    
 
-    y = (num1 / den1) - (num2 / den2) - 1;
+    y = (num1 / den) - (num2 / den) - 1;
 end
 
 
