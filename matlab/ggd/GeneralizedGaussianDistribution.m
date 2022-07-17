@@ -99,6 +99,12 @@ classdef GeneralizedGaussianDistribution < prob.ToolboxFittableParametricDistrib
             % Excess kurtosis, (3 is already subtracted.)
             k = ggdkurt(this.beta);
         end
+
+        function e = entropy(this)
+            % entropy of the distribution.
+            binv = 1 / this.beta;
+            e = binv - log(this.beta / (2*this.alpha*gamma(binv)));
+        end
     end
 
     methods(Static)
