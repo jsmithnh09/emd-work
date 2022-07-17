@@ -141,7 +141,7 @@ classdef GeneralizedGaussianDistribution < prob.ToolboxFittableParametricDistrib
             sigma = std(x);
             
             % using the Globally convergent method.
-            beta = gcm_search(x, m1/sigma, 1000);
+            beta = gcm2(x, m1/sigma+3, 100);
             alpha = sigma * sqrt(gamma(1/beta) / gamma(3/beta));
 
             % construct the "observed" data.
