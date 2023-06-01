@@ -23,9 +23,7 @@ classdef GeneralizedGaussianDistribution < prob.ToolboxFittableParametricDistrib
     %       ParameterCovariance - Covariance matrix of estimated parameters
     %       InputData           - structure containing data used to fit the distribution
     %
-    % See also fitdist, makedist.
-    %
-    % Copyright 2022 Bose Corporation
+    % See also: fitdist, makedist
 
     properties(GetAccess='public', Constant=true)
         DistributionName = 'Generalized Gaussian';
